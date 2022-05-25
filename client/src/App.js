@@ -10,9 +10,9 @@ class App extends Component {
         web3: null,
         accounts: null,
         chainid: null,
-        vyperStorage: null,
-        vyperValue: 0,
-        vyperInput: 0,
+        // vyperStorage: null,
+        // vyperValue: 0,
+        // vyperInput: 0,
         solidityStorage: null,
         solidityValue: 0,
         solidityInput: 0,
@@ -21,12 +21,14 @@ class App extends Component {
     componentDidMount = async () => {
 
         // Get network provider and web3 instance.
-        const web3 = await getWeb3()
-
+        const web3 = await getWeb3()    // used to connect with the blockchain (can be trough ganache or whatever test or mainnet)
+        
         // Try and enable accounts (connect metamask)
         try {
-            const ethereum = await getEthereum()
-            ethereum.enable()
+            const ethereum = await getEthereum()    
+            console.log("prima di enable")
+            ethereum.enable()   // used to confirm the connection with web3 above using metamask
+            console.log("dopo enable")
         } catch (e) {
             console.log(`Could not enable accounts. Interaction with contracts not available.
             Use a modern browser with a Web3 plugin to fix this issue.`)
@@ -35,6 +37,8 @@ class App extends Component {
 
         // Use web3 to get the user's accounts
         const accounts = await web3.eth.getAccounts()
+        console.log(accounts)
+
 
         // Get the current chain id
         const chainid = parseInt(await web3.eth.getChainId())
@@ -66,19 +70,19 @@ class App extends Component {
             _chainID = 4
         }
         console.log(_chainID)
-        const vyperStorage = await this.loadContract(_chainID,"VyperStorage")
+        // const vyperStorage = await this.loadContract(_chainID,"VyperStorage")
         const solidityStorage = await this.loadContract(_chainID,"SolidityStorage")
 
-        if (!vyperStorage || !solidityStorage) {
+        if (!solidityStorage) {
             return
         }
 
-        const vyperValue = await vyperStorage.methods.get().call()
+        // const vyperValue = await vyperStorage.methods.get().call()
         const solidityValue = await solidityStorage.methods.get().call()
 
         this.setState({
-            vyperStorage,
-            vyperValue,
+            // vyperStorage,
+            // vyperValue,
             solidityStorage,
             solidityValue,
         })
@@ -109,21 +113,21 @@ class App extends Component {
         return new web3.eth.Contract(contractArtifact.abi, address)
     }
 
-    changeVyper = async (e) => {
-        const {accounts, vyperStorage, vyperInput} = this.state
-        e.preventDefault()
-        const value = parseInt(vyperInput)
-        if (isNaN(value)) {
-            alert("invalid value")
-            return
-        }
-        await vyperStorage.methods.set(value).send({from: accounts[0]})
-            .on('receipt', async () => {
-                this.setState({
-                    vyperValue: await vyperStorage.methods.get().call()
-                })
-            })
-    }
+    // changeVyper = async (e) => {
+    //     const {accounts, vyperStorage, vyperInput} = this.state
+    //     e.preventDefault()
+    //     const value = parseInt(vyperInput)
+    //     if (isNaN(value)) {
+    //         alert("invalid value")
+    //         return
+    //     }
+    //     await vyperStorage.methods.set(value).send({from: accounts[0]})
+    //         .on('receipt', async () => {
+    //             this.setState({
+    //                 vyperValue: await vyperStorage.methods.get().call()
+    //             })
+    //         })
+    // }
 
     changeSolidity = async (e) => {
         const {accounts, solidityStorage, solidityInput} = this.state
@@ -143,8 +147,12 @@ class App extends Component {
 
     render() {
         const {
-            web3, accounts, chainid,
-            vyperStorage, vyperValue, vyperInput,
+            web3, 
+            accounts, 
+            chainid,
+            // vyperStorage, 
+            // vyperValue, 
+            // vyperInput,
             solidityStorage, solidityValue, solidityInput
         } = this.state
 
@@ -157,7 +165,7 @@ class App extends Component {
             return <div>Wrong Network! Switch to your local RPC "Localhost: 8545" in your Web3 provider (e.g. Metamask)</div>
         }
 
-        if (!vyperStorage || !solidityStorage) {
+        if (!solidityStorage) {
             return <div>Could not find a deployed contract. Check console for details.</div>
         }
 
@@ -176,7 +184,7 @@ class App extends Component {
                     </p>
                     : null
             }
-            <h2>Vyper Storage Contract</h2>
+            {/* <h2>Vyper Storage Contract</h2>
 
             <div>The stored value is: {vyperValue}</div>
             <br/>
@@ -193,7 +201,7 @@ class App extends Component {
                     <br/>
                     <button type="submit" disabled={!isAccountsUnlocked}>Submit</button>
                 </div>
-            </form>
+            </form> */}
 
             <h2>Solidity Storage Contract</h2>
             <div>The stored value is: {solidityValue}</div>
